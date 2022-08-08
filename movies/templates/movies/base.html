@@ -1,0 +1,77 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="shortcut icon" href="{% static 'movies/image/logo.ico' %}">
+  <title>{% block title %}{% endblock title %}</title>
+
+  {% block css %}
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+      [v-cloak] {
+        display: none;
+      }
+    </style>
+  {% endblock css %}
+</head>
+
+<body class="font-sans bg-gray-900 text-white">
+  {% include 'movies/navbar.html' %}
+
+  {% block content %}
+  {% endblock content %}
+
+
+  {% block javascript %}
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="{% static 'movies/js/vue-spinner.min.js' %}"></script>
+  {% endblock javascript %}
+
+  <script>
+    var app = new Vue({
+      delimiters: ['[[', ']]'],
+      el: '#search-app',
+      data: {
+          query: '',
+          searchResultsVisible: false,
+          movies:[],
+      },
+      methods: {
+
+          softReset: function(){
+            this.searchResultsVisible = true
+          }, 
+          keyMonitor(e){
+            if(e.key === '/'){
+              console.log(e.keyCode)
+              this.$refs.search.focus()
+            }
+          },
+          performSearch(){
+            if(this.query.length > 2){
+            let url = "{% url 'search-movie' 'query' %}";
+            url = url.replace('query', this.query)
+            axios.get(url)
+              .then(response =>{
+                if(response.data.status === true)
+                  this.movies = JSON.parse(response.data.response)
+                  
+              })
+          }
+          },
+          urlPrepare(id, imdb_code){
+            let url = "{% url 'movie' 'id' 'imdb_code' %}"
+            url = url.replace('id', id).replace('imdb_code', imdb_code)
+            return url
+          }
+      }
+    });
+  </script>
+</body>
+</html>
